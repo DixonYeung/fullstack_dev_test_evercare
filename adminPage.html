@@ -1,0 +1,155 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>AdminPage</title>
+    <style>
+      html{
+        background-color: #3c4cad;
+        background-image: linear-gradient(180deg,#3c4cad,#c24ca2,#ff6d7d,#ffb05d,#f9f871);
+      }
+      body{
+        font-family: sans-serif;
+      }
+      .grid{
+        border-radius: 4px;
+        display: inline-block;
+        width: 160px;
+        margin: 20px;
+        padding: 15px 0px 10px 0px;
+        background-color: white;
+      }
+      .grid-text-id{
+            padding: 0px 25px 0px 25px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 16px 0px 5px 0px;
+            color: #6c757d;
+            font-size: 12px;
+      }
+      .grid-text-name{
+            padding: 0px 5px 0px 5px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 5px 0px 5px 0px;
+            text-transform: capitalize;
+            font-weight: bold;
+      }
+      .grid-text-email{
+            padding: 0px 5px 0px 5px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 5px 0px 15px 0px;
+            color: #6c757d;
+            font-size: 12px;
+      }
+      #main{
+        text-align: center;
+        margin: 0px 150px 0px 150px;
+      }
+      .propic{
+
+      }
+
+      @media only screen and (max-device-width: 600px) {
+        #main{
+          text-align: center;
+          margin: 0px 0px 0px 0px;
+        }
+        .grid{
+          border-radius: 4px;
+          display: inline-block;
+          width: 120px;
+          margin: 20px;
+          padding: 15px 0px 10px 0px;
+          background-color: white;
+        }
+        .propic{
+          width: 100px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <h3 style="text-align: center; margin-top: 20px;color: white;">Welcome to Admin page !</h3>
+    <div id="main"></div>
+  </body>
+  <script>
+    
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("POST", "http://localhost:8081/", true);
+      xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xmlhttp.send('requestType=initializeTable');
+    
+
+      xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var fetched_result =  this.responseText;
+          console.log(fetched_result);
+          var json_result = JSON.parse(fetched_result);
+          /*document.getElementById("main").innerHTML = json_result.data[0].id;*/
+          for(var i = 0; i < json_result.data.length; i++){
+            var div = document.createElement("div");
+            div.className = "grid";
+            div.setAttribute('id',json_result.data[i].id);
+            document.getElementById("main").appendChild(div);
+
+            var img = document.createElement("IMG");
+            img.className = "propic";
+            img.src = json_result.data[i].picture;
+            div.appendChild(img);
+
+            var text_content_id = document.createElement("p");
+            var text_content_name = document.createElement("p");
+            var text_content_email = document.createElement("p");
+            text_content_id.className = "grid-text-id";
+            text_content_name.className = "grid-text-name";
+            text_content_email.className = "grid-text-email";
+            
+            text_content_id.innerHTML = "id: "+json_result.data[i].id + "<br>";
+            text_content_name.innerHTML = json_result.data[i].title +" "+ json_result.data[i].firstName + " "+json_result.data[i].lastName + "<br>";
+            text_content_email.innerHTML = json_result.data[i].email;
+            div.appendChild(text_content_id);
+            div.appendChild(text_content_name);
+            div.appendChild(text_content_email);
+
+
+
+
+            var deleteButton = document.createElement("button");
+            deleteButton.innerHTML = "delete";
+            div.appendChild(deleteButton);
+
+            //delete button function
+            deleteButton.addEventListener('click', function(e){
+
+              e = e || window.event;
+              var target = e.target || e.srcElement;
+
+
+              var xmlhttpDelete = new XMLHttpRequest();
+              xmlhttpDelete.open("POST", "http://localhost:8081/", true);
+              xmlhttpDelete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+              xmlhttpDelete.send('requestType=delete&id='+target.parentElement.id);
+
+              xmlhttpDelete.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                  var result_of_delete =  this.responseText;
+                  var json_result_of_delete = JSON.parse(result_of_delete);
+                  if(json_result_of_delete.deletedItem[json_result_of_delete.deletedItem.length-1].id==target.parentElement.id){
+                    target.parentElement.parentElement.removeChild(target.parentElement);
+                    console.log(json_result_of_delete);
+                  }
+                }
+              };
+              
+            })
+          }
+        }
+      }
+  </script>
+</html>
